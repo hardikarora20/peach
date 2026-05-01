@@ -1,5 +1,6 @@
 package com.app.peach.user;
 
+import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,4 +31,15 @@ public class UserController {
         UserEntity user = userService.createUser(email, password);
         return ResponseEntity.ok(user);
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> loginUser(@RequestParam String email, @RequestParam String password) {
+        boolean isValid = userService.login(email, password);
+        if (isValid)
+            return ResponseEntity.ok("Login successful");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body("Invalid email or password");
+
+}
+
 }

@@ -26,4 +26,14 @@ public class UserService{
     public Optional<UserEntity> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
+
+
+    public boolean login(String email, String password) {
+        Optional<UserEntity> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isPresent() == false) {
+            return false;
+        }
+        UserEntity user = userOpt.get();
+        return passwordEncoder.matches(password, user.getPasswordHash());
+    }
 }
