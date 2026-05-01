@@ -1,0 +1,49 @@
+package com.app.peach.user;
+
+import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Entity
+@Table(name = "users")
+public class UserEntity {
+
+    @Id
+    @GeneratedValue
+    private UUID id;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false)
+    private String passwordHash;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
+    protected UserEntity() {
+        // JPA requires this
+    }
+
+    public UserEntity(String email, String passwordHash) {
+        this.email = email;
+        this.passwordHash = passwordHash;
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+}
