@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService{
@@ -49,5 +50,11 @@ public class UserService{
                 user.getEmail(),
                 user.getCreatedAt()
         );
+    }
+
+    public UserResponseDTO getMe(UUID userId) {
+        UserEntity user = userRepository.findById(userId).orElse(null);
+        if (user == null) return null;
+        return toResponseDTO(user);
     }
 }

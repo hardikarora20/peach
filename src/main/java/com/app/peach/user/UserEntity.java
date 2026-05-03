@@ -1,5 +1,8 @@
 package com.app.peach.user;
 
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -9,7 +12,10 @@ import java.util.UUID;
 public class UserEntity {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
+    @Type(type = "uuid-char")
+    @Column(length = 36, updatable = false, nullable = false)
     private UUID id;
 
     @Column(nullable = false, unique = true)
