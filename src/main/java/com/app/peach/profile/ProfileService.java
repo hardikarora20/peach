@@ -2,10 +2,13 @@ package com.app.peach.profile;
 
 import com.app.peach.profile.dto.ProfileResponseDTO;
 import com.app.peach.profile.dto.ProfileUpsertRequestDTO;
+import com.app.peach.profile.dto.PublicProfileDTO;
 import com.app.peach.user.UserEntity;
 import com.app.peach.user.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -57,5 +60,38 @@ public class ProfileService {
                 p.getLocation(),
                 p.getUpdatedAt()
         );
+    }
+
+    public PublicProfileDTO getPublicProfile(UUID requesterId, UUID profileUserId) {
+
+        // prevent viewing self via public endpoint
+        if (requesterId.equals(profileUserId)) {
+            return null;
+        }
+
+        ProfileEntity profile = profileRepository.findByUserId(profileUserId);
+        if (profile == null) return null;
+
+        return toPublicDTO(profile);
+    }
+
+    private PublicProfileDTO toPublicDTO(ProfileEntity p) {
+        return new PublicProfileDTO(
+                p.getUser().getId(),
+                p.getName(),
+                p.getAge(),
+                p.getGender(),
+                p.getBio(),
+                p.getLocation()
+        );
+    }
+
+    public List<PublicProfileDTO> getFeed(UUID userId) {
+        List <ProfileEntity> list = profileRepository.findByUserIdNot(userId);
+        List <PublicProfileDTO> result = new ArrayList<>();
+        for(ProfileEntity curr: list){
+            result.add(toPublicDTO(curr));
+        }
+        return result;
     }
 }

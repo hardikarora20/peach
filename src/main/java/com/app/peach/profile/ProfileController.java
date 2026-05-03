@@ -3,10 +3,12 @@ package com.app.peach.profile;
 import com.app.peach.common.util.SecurityUtils;
 import com.app.peach.profile.dto.ProfileResponseDTO;
 import com.app.peach.profile.dto.ProfileUpsertRequestDTO;
+import com.app.peach.profile.dto.PublicProfileDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -41,5 +43,32 @@ public class ProfileController {
         ProfileResponseDTO profile = profileService.upsertMyProfile(userId, req);
         if (profile == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(profile);
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<PublicProfileDTO> getPublicProfile(
+            @PathVariable UUID userId) {
+
+        UUID requesterId = SecurityUtils.getCurrentUserId();
+        if (requesterId == null)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        PublicProfileDTO profile =
+                profileService.getPublicProfile(requesterId, userId);
+
+        if (profile == null)
+            return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok(profile);
+    }
+
+    @GetMapping("/feed")
+    public ResponseEntity<List<PublicProfileDTO>> getFeed() {
+
+        UUID userId = SecurityUtils.getCurrentUserId();
+        if (userId == null)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        return ResponseEntity.ok(profileService.getFeed(userId));
     }
 }
