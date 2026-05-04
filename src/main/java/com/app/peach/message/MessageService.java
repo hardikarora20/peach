@@ -1,5 +1,8 @@
 package com.app.peach.message;
 
+import com.app.peach.common.exception.BadRequestException;
+import com.app.peach.common.exception.ForbiddenException;
+import com.app.peach.common.exception.NotFoundException;
 import com.app.peach.match.MatchEntity;
 import com.app.peach.match.MatchRepository;
 import com.app.peach.message.dto.MessageResponseDTO;
@@ -32,18 +35,18 @@ public class MessageService {
     public MessageResponseDTO sendMessage(UUID currentUserId, SendMessageRequestDTO req) {
 
         // 1) Validate input
-        if (req.getMatchId() == null) throw new RuntimeException("matchId is required");
+        if (req.getMatchId() == null) throw new BadRequestException("matchId is required");
         if (req.getContent() == null || req.getContent().trim().isEmpty())
-            throw new RuntimeException("content is required");
+            throw new BadRequestException("content is required");
 
         //  if no data then return exc if not then clean and take it in content
         String content = req.getContent().trim();
-        if (content.length() > 1000) throw new RuntimeException("content too long");
+        if (content.length() > 1000) throw new BadRequestException("content too long");
 
         // 2) Load match
         //  get match info now, which will contain the id of the 2 users and the match id when it was created
         MatchEntity match = matchRepository.findById(req.getMatchId())
-                .orElseThrow(() -> new RuntimeException("Match not found"));
+                .orElseThrow(() -> new NotFoundException("Match not found"));
 
         // 3) Authorization: must be participant
         //  get userIds of both the users and check if one of the id matches the logged in id
@@ -54,13 +57,13 @@ public class MessageService {
         System.out.println(!currentUserId.equals(u2));
         System.out.println(!currentUserId.equals(u1));
         if (!currentUserId.equals(u1) && !currentUserId.equals(u2)) {
-            throw new RuntimeException("Not allowed");
+            throw new ForbiddenException("Not allowed");
         }
 
         //  if everything looks good, load the currentUser then
         // 4) Load sender
         UserEntity sender = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         // 5) Save message
         //  and then save the actual message
@@ -74,13 +77,13 @@ public class MessageService {
 
         //  to start with verifying if match exists
         MatchEntity match = matchRepository.findById(matchId)
-                .orElseThrow(() -> new RuntimeException("Match not found"));
+                .orElseThrow(() -> new NotFoundException("Match not found"));
 
         //  then the same thing matching user ids and stuff
         UUID u1 = match.getUser1().getId();
         UUID u2 = match.getUser2().getId();
         if (!currentUserId.equals(u1) && !currentUserId.equals(u2)) {
-            throw new RuntimeException("Not allowed");
+            throw new ForbiddenException("Not allowed");
         }
 
         //  then getting all messages for this particular match id in asc order
