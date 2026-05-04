@@ -35,7 +35,7 @@ public class MatchService {
             PublicProfileDTO publicProfileOfMatch = profileOfMatch == null
                     ? new PublicProfileDTO(idOfMatch, null, null, null, null, null)
                     : new PublicProfileDTO(idOfMatch, profileOfMatch.getName(), profileOfMatch.getAge(), profileOfMatch.getGender(), profileOfMatch.getBio(), profileOfMatch.getLocation());
-            listOfMatches.add(new MatchItemDTO(idOfMatch, currMatch.getMatchedAt(), publicProfileOfMatch));
+            listOfMatches.add(new MatchItemDTO(currMatch.getId(), currMatch.getMatchedAt(), publicProfileOfMatch));
         }
         return listOfMatches;
     }
