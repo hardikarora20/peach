@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -42,8 +43,26 @@ public class ProfileService {
             profile = new ProfileEntity(user, req.getName(), req.getAge(), req.getGender(), req.getBio(), req.getLocation());
         } else {
         //    if already exists then we get update things of the profile not the user
-            profile.update(req.getName(), req.getAge(), req.getGender(), req.getBio(), req.getLocation());
+            profile.updateCore(req.getName(), req.getAge(), req.getGender(), req.getBio(), req.getLocation());
         }
+
+        profile.updateQuestions(
+                req.getDatingIntent(),
+                req.getConnectionPreference(),
+                req.getOpenToLongDistance(),
+                req.getPersonalityTraits(),
+                req.getCommunicationStyle(),
+                req.getLoveLanguage(),
+                req.getConflictStyle(),
+                req.getDrinkHabit(),
+                req.getSmokeHabit(),
+                req.getFoodPreference(),
+                req.getSleepStyle(),
+                req.getCoreValues(),
+                req.getDealbreakers(),
+                req.getInterests()
+        );
+
         //    saving the newly created/updated profile
         ProfileEntity saved = profileRepository.save(profile);
         return toDTO(saved);
@@ -58,7 +77,21 @@ public class ProfileService {
                 p.getGender(),
                 p.getBio(),
                 p.getLocation(),
-                p.getUpdatedAt()
+                p.getUpdatedAt(),
+        p.getDatingIntent(),
+        p.getConnectionPreference(),
+        p.getOpenToLongDistance(),
+        p.getPersonalityTraits(),
+        p.getCommunicationStyle(),
+        p.getLoveLanguage(),
+                p.getConflictStyle(),
+        p.getDrinkHabit(),
+        p.getSmokeHabit(),
+        p.getFoodPreference(),
+        p.getSleepStyle(),
+        p.getCoreValues(),
+        p.getDealbreakers(),
+        p.getInterests()
         );
     }
 

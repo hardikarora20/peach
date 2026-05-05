@@ -1,12 +1,14 @@
 package com.app.peach.profile;
 
+import java.util.Set;
 import com.app.peach.user.UserEntity;
+import java.util.UUID;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.HashSet;
 
 @Entity
 @Table(name = "profiles")
@@ -19,11 +21,11 @@ public class ProfileEntity {
     @Column(length = 36, updatable = false, nullable = false)
     private UUID id;
 
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private UserEntity user;
 
+    // Core
     @Column(nullable = false)
     private String name;
 
@@ -41,6 +43,61 @@ public class ProfileEntity {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    // 💖 Intent & Dating (single choice)
+    @Column(name = "dating_intent", length = 50)
+    private String datingIntent;
+
+    @Column(name = "connection_preference", length = 50)
+    private String connectionPreference;
+
+    @Column(name = "open_to_long_distance", length = 10)
+    private String openToLongDistance;
+
+    // 🧬 Personality & Compatibility
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "profile_personality_traits", joinColumns = @JoinColumn(name = "profile_id"))
+    @Column(name = "trait", length = 50)
+    private Set<String> personalityTraits = new HashSet<>();
+
+    @Column(name = "communication_style", length = 50)
+    private String communicationStyle;
+
+    @Column(name = "love_language", length = 50)
+    private String loveLanguage;
+
+    @Column(name = "conflict_style", length = 50)
+    private String conflictStyle;
+
+    // 🌿 Lifestyle
+    @Column(name = "drink_habit", length = 20)
+    private String drinkHabit;
+
+    @Column(name = "smoke_habit", length = 20)
+    private String smokeHabit;
+
+    @Column(name = "food_preference", length = 20)
+    private String foodPreference;
+
+    @Column(name = "sleep_style", length = 20)
+    private String sleepStyle;
+
+    // 🎯 Values & Preferences (multi)
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "profile_core_values", joinColumns = @JoinColumn(name = "profile_id"))
+    @Column(name = "value_name", length = 50)
+    private Set<String> coreValues = new HashSet<>();
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "profile_dealbreakers", joinColumns = @JoinColumn(name = "profile_id"))
+    @Column(name = "dealbreaker", length = 50)
+    private Set<String> dealbreakers = new HashSet<>();
+
+    // 🎨 Interests (multi)
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "profile_interests", joinColumns = @JoinColumn(name = "profile_id"))
+    @Column(name = "interest", length = 50)
+    private Set<String> interests = new HashSet<>();
+
     protected ProfileEntity() {}
 
     public ProfileEntity(UserEntity user, String name, Integer age, String gender, String bio, String location) {
@@ -53,7 +110,7 @@ public class ProfileEntity {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void update(String name, Integer age, String gender, String bio, String location) {
+    public void updateCore(String name, Integer age, String gender, String bio, String location) {
         this.name = name;
         this.age = age;
         this.gender = gender;
@@ -62,6 +119,50 @@ public class ProfileEntity {
         this.updatedAt = LocalDateTime.now();
     }
 
+    public void updateQuestions(String datingIntent,
+                                String connectionPreference,
+                                String openToLongDistance,
+                                Set<String> personalityTraits,
+                                String communicationStyle,
+                                String loveLanguage,
+                                String conflictStyle,
+                                String drinkHabit,
+                                String smokeHabit,
+                                String foodPreference,
+                                String sleepStyle,
+                                Set<String> coreValues,
+                                Set<String> dealbreakers,
+                                Set<String> interests) {
+
+        this.datingIntent = datingIntent;
+        this.connectionPreference = connectionPreference;
+        this.openToLongDistance = openToLongDistance;
+
+        this.personalityTraits.clear();
+        if (personalityTraits != null) this.personalityTraits.addAll(personalityTraits);
+
+        this.communicationStyle = communicationStyle;
+        this.loveLanguage = loveLanguage;
+        this.conflictStyle = conflictStyle;
+
+        this.drinkHabit = drinkHabit;
+        this.smokeHabit = smokeHabit;
+        this.foodPreference = foodPreference;
+        this.sleepStyle = sleepStyle;
+
+        this.coreValues.clear();
+        if (coreValues != null) this.coreValues.addAll(coreValues);
+
+        this.dealbreakers.clear();
+        if (dealbreakers != null) this.dealbreakers.addAll(dealbreakers);
+
+        this.interests.clear();
+        if (interests != null) this.interests.addAll(interests);
+
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // getters
     public UUID getId() { return id; }
     public UserEntity getUser() { return user; }
     public String getName() { return name; }
@@ -70,4 +171,23 @@ public class ProfileEntity {
     public String getBio() { return bio; }
     public String getLocation() { return location; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
+
+    public String getDatingIntent() { return datingIntent; }
+    public String getConnectionPreference() { return connectionPreference; }
+    public String getOpenToLongDistance() { return openToLongDistance; }
+
+    public Set<String> getPersonalityTraits() { return personalityTraits; }
+    public String getCommunicationStyle() { return communicationStyle; }
+    public String getLoveLanguage() { return loveLanguage; }
+    public String getConflictStyle() { return conflictStyle; }
+
+    public String getDrinkHabit() { return drinkHabit; }
+    public String getSmokeHabit() { return smokeHabit; }
+    public String getFoodPreference() { return foodPreference; }
+    public String getSleepStyle() { return sleepStyle; }
+
+    public Set<String> getCoreValues() { return coreValues; }
+    public Set<String> getDealbreakers() { return dealbreakers; }
+    public Set<String> getInterests() { return interests; }
 }
+

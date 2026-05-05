@@ -1,6 +1,7 @@
 package com.app.peach.match;
 
 import com.app.peach.match.dto.MatchItemDTO;
+import com.app.peach.message.MessageRepository;
 import com.app.peach.profile.ProfileEntity;
 import com.app.peach.profile.ProfileRepository;
 import com.app.peach.profile.dto.ProfileResponseDTO;
@@ -10,20 +11,24 @@ import com.app.peach.user.UserEntity;
 import com.app.peach.user.UserRepository;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class MatchService {
 
     private final MatchRepository matchRepository;
     private final ProfileRepository profileRepository;
+    private final MessageRepository messageRepository;
 
-    public MatchService(MatchRepository matchRepository, ProfileRepository profileRepository, UserRepository userRepository) {
+    public MatchService(MatchRepository matchRepository, ProfileRepository profileRepository, UserRepository userRepository, MessageRepository messageRepository) {
         this.matchRepository = matchRepository;
         this.profileRepository = profileRepository;
+        this.messageRepository = messageRepository;
     }
 
     public List<MatchItemDTO> getMyMatches(UUID currentUserId) {

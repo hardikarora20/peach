@@ -63,7 +63,8 @@ public class SecurityConfig {
         // Live Server can be localhost or 127.0.0.1
         config.setAllowedOrigins(Arrays.asList(
             "http://localhost:5500",
-            "http://127.0.0.1:5500"
+            "http://127.0.0.1:5500",
+            "http://localhost:5173"
         ));
 
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));

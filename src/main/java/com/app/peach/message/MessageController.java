@@ -31,4 +31,11 @@ public class MessageController {
         UUID userId = SecurityUtils.getCurrentUserId();
         return ResponseEntity.ok(messageService.getMessages(userId, matchId));
     }
+
+//    @GetMapping("/{matchId}")
+//    public List<MessageResponseDTO> getMessages(@RequestAttribute("currentUserId") UUID currentUserId,
+//                                                @PathVariable UUID matchId,
+//                                                @RequestParam(defaultValue = "false") boolean markRead) {
+//        return messageService.getMessages(currentUserId, matchId, markRead);
+//    }
 }
