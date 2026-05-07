@@ -1,0 +1,5 @@
+ALTER TABLE profiles
+  ADD COLUMN prompt1 TEXT NULL,
+  ADD COLUMN prompt2 TEXT NULL,
+  ADD COLUMN prompt3 TEXT NULL,
+  ADD COLUMN opening_line VARCHAR(255) NULL;

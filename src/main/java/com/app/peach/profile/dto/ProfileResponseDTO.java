@@ -3,6 +3,7 @@ package com.app.peach.profile.dto;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -31,6 +32,12 @@ public class ProfileResponseDTO {
     private Set<String> dealbreakers = new HashSet<>();
     private Set<String> interests = new HashSet<>();
 
+    private List<String> images;
+
+    private String openingLine;
+    private List<ProfilePromptDTO> profilePrompts;
+
+
     public ProfileResponseDTO(UUID profileId, UUID userId, String name, Integer age, String gender, String bio, String location, LocalDateTime updatedAt, String datingIntent,
                               String connectionPreference,
                               String openToLongDistance,
@@ -44,7 +51,10 @@ public class ProfileResponseDTO {
                               String sleepStyle,
                               Set<String> coreValues,
                               Set<String> dealbreakers,
-                              Set<String> interests) {
+                              Set<String> interests,
+                              List<String> images,
+                              String openingLine,
+                              List<ProfilePromptDTO> profilePrompts) {
         this.profileId = profileId;
         this.userId = userId;
         this.name = name;
@@ -79,6 +89,9 @@ public class ProfileResponseDTO {
         if (interests != null) this.interests.addAll(interests);
 
         this.updatedAt = LocalDateTime.now();
+        this.images = images;
+        this.openingLine = openingLine;
+        this.profilePrompts = profilePrompts;
     }
 
     public UUID getProfileId() { return profileId; }
@@ -106,5 +119,14 @@ public class ProfileResponseDTO {
     public Set<String> getCoreValues() { return coreValues; }
     public Set<String> getDealbreakers() { return dealbreakers; }
     public Set<String> getInterests() { return interests; }
+
+
+    public List<String> getImages(){
+        return images;
+    }
+
+
+    public String getOpeningLine() { return openingLine; }
+    public List<ProfilePromptDTO> getProfilePrompts() { return profilePrompts; }
 
 }

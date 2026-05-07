@@ -98,6 +98,19 @@ public class ProfileEntity {
     @Column(name = "interest", length = 50)
     private Set<String> interests = new HashSet<>();
 
+
+    @Column(name = "prompt1", columnDefinition = "text")
+    private String prompt1;
+
+    @Column(name = "prompt2", columnDefinition = "text")
+    private String prompt2;
+
+    @Column(name = "prompt3", columnDefinition = "text")
+    private String prompt3;
+
+    @Column(name = "opening_line", length = 255)
+    private String openingLine;
+
     protected ProfileEntity() {}
 
     public ProfileEntity(UserEntity user, String name, Integer age, String gender, String bio, String location) {
@@ -189,5 +202,17 @@ public class ProfileEntity {
     public Set<String> getCoreValues() { return coreValues; }
     public Set<String> getDealbreakers() { return dealbreakers; }
     public Set<String> getInterests() { return interests; }
+
+
+    public String getPrompt1() { return prompt1; }
+    public String getPrompt2() { return prompt2; }
+    public String getPrompt3() { return prompt3; }
+    public String getOpeningLine() { return openingLine; }
+
+    public void setPrompt1(String prompt1) { this.prompt1 = prompt1; }
+    public void setPrompt2(String prompt2) { this.prompt2 = prompt2; }
+    public void setPrompt3(String prompt3) { this.prompt3 = prompt3; }
+    public void setOpeningLine(String openingLine) { this.openingLine = openingLine; }
+
 }
 

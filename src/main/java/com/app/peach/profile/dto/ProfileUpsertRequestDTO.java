@@ -1,5 +1,6 @@
 package com.app.peach.profile.dto;
 
+import java.util.List;
 import java.util.Set;
 
 public class ProfileUpsertRequestDTO {
@@ -34,6 +35,15 @@ public class ProfileUpsertRequestDTO {
 
     // 🎨 Interests
     private Set<String> interests;         // multi
+
+    private String openingLine;
+    private List<ProfilePromptDTO> profilePrompts;
+
+    public String getOpeningLine() { return openingLine; }
+    public void setOpeningLine(String openingLine) { this.openingLine = openingLine; }
+
+    public List<ProfilePromptDTO> getProfilePrompts() { return profilePrompts; }
+    public void setProfilePrompts(List<ProfilePromptDTO> profilePrompts) { this.profilePrompts = profilePrompts; }
 
     public ProfileUpsertRequestDTO() {}
 

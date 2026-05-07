@@ -1,27 +1,37 @@
 package com.app.peach.profile;
 
+import com.app.peach.common.exception.BadRequestException;
+import com.app.peach.photo.PhotoRepository;
+import com.app.peach.profile.dto.ProfilePromptDTO;
 import com.app.peach.profile.dto.ProfileResponseDTO;
 import com.app.peach.profile.dto.ProfileUpsertRequestDTO;
 import com.app.peach.profile.dto.PublicProfileDTO;
 import com.app.peach.user.UserEntity;
 import com.app.peach.user.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ProfileService {
 
     private final ProfileRepository profileRepository;
     private final UserRepository userRepository;
+    private final PhotoRepository photoRepository;
+    private final ObjectMapper objectMapper;
 
-    public ProfileService(ProfileRepository profileRepository, UserRepository userRepository) {
+    public ProfileService(ProfileRepository profileRepository,
+                          UserRepository userRepository,
+                          PhotoRepository photoRepository,
+                          ObjectMapper objectMapper) {
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
+        this.photoRepository = photoRepository;
+        this.objectMapper = objectMapper;
     }
+
 
     public ProfileResponseDTO getMyProfile(UUID userId) {
         ProfileEntity profile = profileRepository.findByUserId(userId);
@@ -63,12 +73,21 @@ public class ProfileService {
                 req.getInterests()
         );
 
+        profile.setOpeningLine(req.getOpeningLine());
+        writePrompts(profile, req.getProfilePrompts());
+
+
+
         //    saving the newly created/updated profile
         ProfileEntity saved = profileRepository.save(profile);
         return toDTO(saved);
     }
 
     private ProfileResponseDTO toDTO(ProfileEntity p) {
+        List<String> images = loadImageUrls(p.getUser().getId());
+
+        List<ProfilePromptDTO> prompts = readPrompts(p);
+
         return new ProfileResponseDTO(
                 p.getId(),
                 p.getUser().getId(),
@@ -91,7 +110,11 @@ public class ProfileService {
         p.getSleepStyle(),
         p.getCoreValues(),
         p.getDealbreakers(),
-        p.getInterests()
+        p.getInterests(),
+        images,
+                p.getOpeningLine(),
+                prompts
+
         );
     }
 
@@ -127,4 +150,57 @@ public class ProfileService {
         }
         return result;
     }
+
+        private List<String> loadImageUrls(UUID userId) {
+            return photoRepository.findByUser_IdOrderByPositionAsc(userId)
+                    .stream()
+                    .map(p -> p.getUrl())
+                    .collect(Collectors.toList());
+        }
+
+    private String toPromptJson(ProfilePromptDTO p) {
+        try {
+            if (p == null) return null;
+            return objectMapper.writeValueAsString(p);
+        } catch (Exception e) {
+            // keep it simple with your current exception approach
+            throw new BadRequestException("Invalid prompt format");
+        }
+    }
+
+    private ProfilePromptDTO fromPromptJson(String json) {
+        try {
+            if (json == null || json.trim().isEmpty()) return null;
+            return objectMapper.readValue(json, ProfilePromptDTO.class);
+        } catch (Exception e) {
+            // if DB has bad data, just ignore
+            return null;
+        }
+    }
+
+    private List<ProfilePromptDTO> readPrompts(ProfileEntity p) {
+        List<ProfilePromptDTO> list = new ArrayList<>();
+        ProfilePromptDTO a = fromPromptJson(p.getPrompt1());
+        ProfilePromptDTO b = fromPromptJson(p.getPrompt2());
+        ProfilePromptDTO c = fromPromptJson(p.getPrompt3());
+        if (a != null) list.add(a);
+        if (b != null) list.add(b);
+        if (c != null) list.add(c);
+        return list;
+    }
+
+    private void writePrompts(ProfileEntity p, List<ProfilePromptDTO> prompts) {
+        List<ProfilePromptDTO> safe = prompts == null ? Collections.emptyList() : prompts;
+
+        // max 3
+        ProfilePromptDTO p1 = safe.size() > 0 ? safe.get(0) : null;
+        ProfilePromptDTO p2 = safe.size() > 1 ? safe.get(1) : null;
+        ProfilePromptDTO p3 = safe.size() > 2 ? safe.get(2) : null;
+
+        p.setPrompt1(p1 == null ? null : toPromptJson(p1));
+        p.setPrompt2(p2 == null ? null : toPromptJson(p2));
+        p.setPrompt3(p3 == null ? null : toPromptJson(p3));
+    }
+
+
 }
