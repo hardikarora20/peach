@@ -36,6 +36,7 @@ public class ProfileUpsertRequestDTO {
     // 🎨 Interests
     private Set<String> interests;         // multi
 
+    private List<String> images;
     private String openingLine;
     private List<ProfilePromptDTO> profilePrompts;
 
@@ -105,4 +106,8 @@ public class ProfileUpsertRequestDTO {
 
     public Set<String> getInterests() { return interests; }
     public void setInterests(Set<String> interests) { this.interests = interests; }
+
+    public List<String> getImages(){
+        return images;
+    }
 }

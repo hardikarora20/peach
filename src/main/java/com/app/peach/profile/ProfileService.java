@@ -1,6 +1,7 @@
 package com.app.peach.profile;
 
 import com.app.peach.common.exception.BadRequestException;
+import com.app.peach.photo.PhotoEntity;
 import com.app.peach.photo.PhotoRepository;
 import com.app.peach.profile.dto.ProfilePromptDTO;
 import com.app.peach.profile.dto.ProfileResponseDTO;
@@ -11,6 +12,7 @@ import com.app.peach.user.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,6 +43,10 @@ public class ProfileService {
     }
 
     //    update or insert profile
+    //    deleteByUser_Id(...) triggers a delete operation internally.
+    //    Hibernate requires a transaction for delete/remove.
+    //    Since your service method isn’t in a transaction (or Spring proxy isn’t applying it), there’s no active EntityManager transaction → boom.
+    @Transactional
     public ProfileResponseDTO upsertMyProfile(UUID userId, ProfileUpsertRequestDTO req) {
         UserEntity user = userRepository.findById(userId).orElse(null);
         //    if user is not there then we cannot proceed further
@@ -76,10 +82,22 @@ public class ProfileService {
         profile.setOpeningLine(req.getOpeningLine());
         writePrompts(profile, req.getProfilePrompts());
 
+        int currCount = 0;
+        System.out.println(photoRepository.countByUser_Id(userId));
+        photoRepository.deleteByUser_Id(userId);
+        System.out.println("after delete: " + photoRepository.countByUser_Id(userId));
+        List <String> imageList = req.getImages();
+        for(String currImage: imageList){
+            photoRepository.save(new PhotoEntity(user, currImage, currCount));
+            currCount++;
+        }
 
+        System.out.println("insert: " + photoRepository.countByUser_Id(userId));
+//        save images in photo
 
         //    saving the newly created/updated profile
         ProfileEntity saved = profileRepository.save(profile);
+
         return toDTO(saved);
     }
 
