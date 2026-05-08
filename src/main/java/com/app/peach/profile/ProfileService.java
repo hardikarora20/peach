@@ -143,20 +143,41 @@ public class ProfileService {
             return null;
         }
 
-        ProfileEntity profile = profileRepository.findByUserId(profileUserId);
+        Optional<ProfileEntity> optProfile = profileRepository.findById(profileUserId);
+        ProfileEntity profile = optProfile.get();
         if (profile == null) return null;
 
         return toPublicDTO(profile);
     }
 
     private PublicProfileDTO toPublicDTO(ProfileEntity p) {
+        List<String> images = loadImageUrls(p.getUser().getId());
+        List<ProfilePromptDTO> prompts = readPrompts(p);
         return new PublicProfileDTO(
-                p.getUser().getId(),
+                p.getId(),
                 p.getName(),
                 p.getAge(),
                 p.getGender(),
                 p.getBio(),
-                p.getLocation()
+                p.getLocation(),
+                p.getDatingIntent(),
+                p.getConnectionPreference(),
+                p.getOpenToLongDistance(),
+                p.getPersonalityTraits(),
+                p.getCommunicationStyle(),
+                p.getLoveLanguage(),
+                p.getConflictStyle(),
+                p.getDrinkHabit(),
+                p.getSmokeHabit(),
+                p.getFoodPreference(),
+                p.getSleepStyle(),
+                p.getCoreValues(),
+                p.getDealbreakers(),
+                p.getInterests(),
+                images,
+                p.getOpeningLine(),
+                prompts
+
         );
     }
 
@@ -169,12 +190,12 @@ public class ProfileService {
         return result;
     }
 
-        private List<String> loadImageUrls(UUID userId) {
-            return photoRepository.findByUser_IdOrderByPositionAsc(userId)
-                    .stream()
-                    .map(p -> p.getUrl())
-                    .collect(Collectors.toList());
-        }
+    private List<String> loadImageUrls(UUID userId) {
+        return photoRepository.findByUser_IdOrderByPositionAsc(userId)
+                .stream()
+                .map(p -> p.getUrl())
+                .collect(Collectors.toList());
+    }
 
     private String toPromptJson(ProfilePromptDTO p) {
         try {
