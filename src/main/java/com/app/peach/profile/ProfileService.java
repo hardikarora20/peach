@@ -1,6 +1,7 @@
 package com.app.peach.profile;
 
 import com.app.peach.common.exception.BadRequestException;
+import com.app.peach.common.exception.ProfileNotFoundException;
 import com.app.peach.photo.PhotoEntity;
 import com.app.peach.photo.PhotoRepository;
 import com.app.peach.profile.dto.ProfilePromptDTO;
@@ -41,6 +42,13 @@ public class ProfileService {
             return null;
         return toDTO(profile);
     }
+
+
+    public UUID getProfileIdByUserId(UUID userId) {
+        return profileRepository.findProfileIdByUserId(userId)
+                .orElseThrow(() -> new ProfileNotFoundException("Profile not found for userId=" + userId));
+    }
+
 
     //    update or insert profile
     //    deleteByUser_Id(...) triggers a delete operation internally.
@@ -240,7 +248,7 @@ public class ProfileService {
         p.setPrompt2(p2 == null ? null : toPromptJson(p2));
         p.setPrompt3(p3 == null ? null : toPromptJson(p3));
     }
-    
+
     public boolean isMyCoreProfileComplete(UUID userId) {
         return profileRepository.existsCompleteCoreProfile(userId);
     }

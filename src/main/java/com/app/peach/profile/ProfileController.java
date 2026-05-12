@@ -1,10 +1,7 @@
 package com.app.peach.profile;
 
 import com.app.peach.common.util.SecurityUtils;
-import com.app.peach.profile.dto.ProfileExistsResponseDTO;
-import com.app.peach.profile.dto.ProfileResponseDTO;
-import com.app.peach.profile.dto.ProfileUpsertRequestDTO;
-import com.app.peach.profile.dto.PublicProfileDTO;
+import com.app.peach.profile.dto.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -81,5 +78,11 @@ public class ProfileController {
 
         boolean exists = profileService.isMyCoreProfileComplete(userId);
         return ResponseEntity.ok(new ProfileExistsResponseDTO(exists));
+    }
+
+    @GetMapping("/getId/{userId}")
+    public ResponseEntity<ProfileIdResponse> getProfileId(@PathVariable UUID userId) {
+        UUID profileId = profileService.getProfileIdByUserId(userId);
+        return ResponseEntity.ok(new ProfileIdResponse(profileId));
     }
 }
