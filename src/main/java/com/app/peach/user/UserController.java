@@ -43,6 +43,10 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<UserResponseDTO> createUser(@RequestBody RegisterRequestDTO registerRequestDTO) {
+        UserEntity checkEmailExists = userService.findByEmail(registerRequestDTO.getEmail());
+        if(checkEmailExists != null){
+            return ResponseEntity.status(404).body(new UserResponseDTO(null, null, null));
+        }
         UserResponseDTO user = userService.createUser(registerRequestDTO);
         return ResponseEntity.ok(user);
     }

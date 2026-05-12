@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public class PublicProfileDTO {
 
+//    private UUID profileId;
     private UUID userId;
     private String name;
     private Integer age;
@@ -53,6 +54,7 @@ public class PublicProfileDTO {
                             String openingLine,
                             List<ProfilePromptDTO> profilePrompts) {
         this.userId = userId;
+//        this.profileId = profileId;
         this.name = name;
         this.age = age;
         this.gender = gender;

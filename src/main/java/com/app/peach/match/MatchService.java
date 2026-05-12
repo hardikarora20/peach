@@ -61,14 +61,26 @@ public class MatchService {
         List<MatchEntity> matches = matchRepository.findByUser1_IdOrUser2_Id(currentUserId, currentUserId);
         List <MatchItemDTO> listOfMatches = new ArrayList<>();
         for(MatchEntity currMatch: matches){
-            UUID idOfMatch = currMatch.getUser1().getId().equals(currentUserId) ? currMatch.getUser2().getId() : currMatch.getUser1().getId();
+            UUID idOfMatch, idOfOtherUser;
+            if(currMatch.getUser1().getId().equals(currentUserId)){
+                idOfMatch = currMatch.getUser2().getId();
+                idOfOtherUser = currMatch.getUser1().getId();
+            }
+            else{
+                idOfOtherUser = currMatch.getUser2().getId();
+                idOfMatch = currMatch.getUser1().getId();
+            }
             ProfileEntity profileOfMatch = profileRepository.findByUserId(idOfMatch);
+//            ProfileEntity profileOfOtherMatch = profileRepository.findByUserId(idOfOtherUser);
+            System.out.println("profileOfMatch: " + profileOfMatch.getId());
+//            System.out.println("profileOfOtherMatch: " + profileOfOtherMatch);
             List<String> images = loadImageUrls(profileOfMatch.getUser().getId());
 
             List<ProfilePromptDTO> prompts = readPrompts(profileOfMatch);
             PublicProfileDTO publicProfileOfMatch = profileOfMatch == null
                     ? new PublicProfileDTO(idOfMatch, null, null, null, null, null, null, null, null, null, null, null, null,  null, null, null, null, null, null, null, null, null, null)
                     : new PublicProfileDTO(idOfMatch,
+//                    profileOfMatch.getId(),
                     profileOfMatch.getName(),
                     profileOfMatch.getAge(),
                     profileOfMatch.getGender(),

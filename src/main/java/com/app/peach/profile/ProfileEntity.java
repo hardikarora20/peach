@@ -214,5 +214,36 @@ public class ProfileEntity {
     public void setPrompt3(String prompt3) { this.prompt3 = prompt3; }
     public void setOpeningLine(String openingLine) { this.openingLine = openingLine; }
 
+    @Override
+    public String toString() {
+        return "ProfileEntity{" +
+                "id=" + id +
+                ", user=" + user +
+                ", name='" + name + '\'' +
+                ", age=" + age +
+                ", gender='" + gender + '\'' +
+                ", bio='" + bio + '\'' +
+                ", location='" + location + '\'' +
+                ", updatedAt=" + updatedAt +
+                ", datingIntent='" + datingIntent + '\'' +
+                ", connectionPreference='" + connectionPreference + '\'' +
+                ", openToLongDistance='" + openToLongDistance + '\'' +
+                ", personalityTraits=" + personalityTraits +
+                ", communicationStyle='" + communicationStyle + '\'' +
+                ", loveLanguage='" + loveLanguage + '\'' +
+                ", conflictStyle='" + conflictStyle + '\'' +
+                ", drinkHabit='" + drinkHabit + '\'' +
+                ", smokeHabit='" + smokeHabit + '\'' +
+                ", foodPreference='" + foodPreference + '\'' +
+                ", sleepStyle='" + sleepStyle + '\'' +
+                ", coreValues=" + coreValues +
+                ", dealbreakers=" + dealbreakers +
+                ", interests=" + interests +
+                ", prompt1='" + prompt1 + '\'' +
+                ", prompt2='" + prompt2 + '\'' +
+                ", prompt3='" + prompt3 + '\'' +
+                ", openingLine='" + openingLine + '\'' +
+                '}';
+    }
 }
 

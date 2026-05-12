@@ -1,6 +1,7 @@
 package com.app.peach.profile;
 
 import com.app.peach.common.util.SecurityUtils;
+import com.app.peach.profile.dto.ProfileExistsResponseDTO;
 import com.app.peach.profile.dto.ProfileResponseDTO;
 import com.app.peach.profile.dto.ProfileUpsertRequestDTO;
 import com.app.peach.profile.dto.PublicProfileDTO;
@@ -71,5 +72,14 @@ public class ProfileController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         return ResponseEntity.ok(profileService.getFeed(userId));
+    }
+
+    @GetMapping("/me/exists")
+    public ResponseEntity<ProfileExistsResponseDTO> myProfileExists() {
+        UUID userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) return ResponseEntity.status(401).build();
+
+        boolean exists = profileService.isMyCoreProfileComplete(userId);
+        return ResponseEntity.ok(new ProfileExistsResponseDTO(exists));
     }
 }

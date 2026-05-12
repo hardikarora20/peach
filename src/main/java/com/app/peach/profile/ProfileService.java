@@ -240,6 +240,9 @@ public class ProfileService {
         p.setPrompt2(p2 == null ? null : toPromptJson(p2));
         p.setPrompt3(p3 == null ? null : toPromptJson(p3));
     }
-
+    
+    public boolean isMyCoreProfileComplete(UUID userId) {
+        return profileRepository.existsCompleteCoreProfile(userId);
+    }
 
 }
