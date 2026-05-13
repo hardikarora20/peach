@@ -37,7 +37,7 @@ public class ProfileService {
 
 
     public ProfileResponseDTO getMyProfile(UUID userId) {
-        ProfileEntity profile = profileRepository.findByUserId(userId);
+        ProfileEntity profile = profileRepository.findByUser_Id(userId).get();
         if (profile == null)
             return null;
         return toDTO(profile);
@@ -61,7 +61,7 @@ public class ProfileService {
         if (user == null)
             return null;
         //    if profile is present then we get that first
-        ProfileEntity profile = profileRepository.findByUserId(userId);
+        ProfileEntity profile = profileRepository.findByUser_Id(userId).get();
         //    if not then we create it from start
         if (profile == null) {
             profile = new ProfileEntity(user, req.getName(), req.getAge(), req.getGender(), req.getBio(), req.getLocation());
@@ -110,13 +110,13 @@ public class ProfileService {
     }
 
     private ProfileResponseDTO toDTO(ProfileEntity p) {
-        List<String> images = loadImageUrls(p.getUser().getId());
+        List<String> images = loadImageUrls(p.getUserId());
 
         List<ProfilePromptDTO> prompts = readPrompts(p);
 
         return new ProfileResponseDTO(
                 p.getId(),
-                p.getUser().getId(),
+                p.getUserId(),
                 p.getName(),
                 p.getAge(),
                 p.getGender(),
@@ -153,16 +153,18 @@ public class ProfileService {
 
         Optional<ProfileEntity> optProfile = profileRepository.findById(profileUserId);
         ProfileEntity profile = optProfile.get();
+        System.out.println(profile);
         if (profile == null) return null;
 
         return toPublicDTO(profile);
     }
 
     private PublicProfileDTO toPublicDTO(ProfileEntity p) {
-        List<String> images = loadImageUrls(p.getUser().getId());
+        List<String> images = loadImageUrls(p.getUserId());
         List<ProfilePromptDTO> prompts = readPrompts(p);
         return new PublicProfileDTO(
                 p.getId(),
+                p.getUserId(),
                 p.getName(),
                 p.getAge(),
                 p.getGender(),
@@ -190,7 +192,7 @@ public class ProfileService {
     }
 
     public List<PublicProfileDTO> getFeed(UUID userId) {
-        List <ProfileEntity> list = profileRepository.findByUserIdNot(userId);
+        List <ProfileEntity> list = profileRepository.findByUser_IdNot(userId);
         List <PublicProfileDTO> result = new ArrayList<>();
         for(ProfileEntity curr: list){
             result.add(toPublicDTO(curr));

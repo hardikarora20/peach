@@ -70,16 +70,16 @@ public class MatchService {
                 idOfOtherUser = currMatch.getUser2().getId();
                 idOfMatch = currMatch.getUser1().getId();
             }
-            ProfileEntity profileOfMatch = profileRepository.findByUserId(idOfMatch);
+            ProfileEntity profileOfMatch = profileRepository.findByUser_Id(idOfMatch).get();
 //            ProfileEntity profileOfOtherMatch = profileRepository.findByUserId(idOfOtherUser);
             System.out.println("profileOfMatch: " + profileOfMatch.getId());
 //            System.out.println("profileOfOtherMatch: " + profileOfOtherMatch);
-            List<String> images = loadImageUrls(profileOfMatch.getUser().getId());
+            List<String> images = loadImageUrls(profileOfMatch.getUserId());
 
             List<ProfilePromptDTO> prompts = readPrompts(profileOfMatch);
             PublicProfileDTO publicProfileOfMatch = profileOfMatch == null
-                    ? new PublicProfileDTO(idOfMatch, null, null, null, null, null, null, null, null, null, null, null, null,  null, null, null, null, null, null, null, null, null, null)
-                    : new PublicProfileDTO(idOfMatch,
+                    ? new PublicProfileDTO(idOfMatch, idOfOtherUser, null, null, null, null, null, null, null, null, null, null, null, null,  null, null, null, null, null, null, null, null, null, null)
+                    : new PublicProfileDTO(idOfMatch, idOfOtherUser,
 //                    profileOfMatch.getId(),
                     profileOfMatch.getName(),
                     profileOfMatch.getAge(),

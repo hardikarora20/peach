@@ -177,7 +177,8 @@ public class ProfileEntity {
 
     // getters
     public UUID getId() { return id; }
-    public UserEntity getUser() { return user; }
+    public UserEntity getUser() {   return user; }
+    public UUID getUserId(){ return user.getId();}
     public String getName() { return name; }
     public Integer getAge() { return age; }
     public String getGender() { return gender; }
@@ -213,6 +214,8 @@ public class ProfileEntity {
     public void setPrompt2(String prompt2) { this.prompt2 = prompt2; }
     public void setPrompt3(String prompt3) { this.prompt3 = prompt3; }
     public void setOpeningLine(String openingLine) { this.openingLine = openingLine; }
+
+
 
     @Override
     public String toString() {

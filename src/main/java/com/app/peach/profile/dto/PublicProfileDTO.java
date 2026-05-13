@@ -10,6 +10,7 @@ public class PublicProfileDTO {
 
 //    private UUID profileId;
     private UUID userId;
+    private UUID profileId;
     private String name;
     private Integer age;
     private String gender;
@@ -36,7 +37,7 @@ public class PublicProfileDTO {
     private String openingLine;
     private List<ProfilePromptDTO> profilePrompts;
 
-    public PublicProfileDTO(UUID userId, String name, Integer age, String gender, String bio, String location, String datingIntent,
+    public PublicProfileDTO(UUID profileId, UUID userId, String name, Integer age, String gender, String bio, String location, String datingIntent,
                             String connectionPreference,
                             String openToLongDistance,
                             Set<String> personalityTraits,
@@ -54,6 +55,7 @@ public class PublicProfileDTO {
                             String openingLine,
                             List<ProfilePromptDTO> profilePrompts) {
         this.userId = userId;
+        this.profileId = profileId;
 //        this.profileId = profileId;
         this.name = name;
         this.age = age;
@@ -91,6 +93,7 @@ public class PublicProfileDTO {
     }
 
     public UUID getUserId() { return userId; }
+    public UUID getProfileId() { return profileId; }
     public String getName() { return name; }
     public Integer getAge() { return age; }
     public String getGender() { return gender; }

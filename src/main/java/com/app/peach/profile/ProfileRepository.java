@@ -11,10 +11,9 @@ import java.util.UUID;
 public interface ProfileRepository extends JpaRepository<ProfileEntity, UUID> {
 
 
-    ProfileEntity findByUserId(UUID userId);
     Optional<ProfileEntity> findById(UUID id);
-    List<ProfileEntity> findByUserIdNot(UUID userId);
-
+    Optional<ProfileEntity> findByUser_Id(UUID userId);
+    List<ProfileEntity> findByUser_IdNot(UUID userId);
 
     @Query("select p.id from ProfileEntity p where p.user.id = :userId")
     Optional<UUID> findProfileIdByUserId(@Param("userId") UUID userId);
