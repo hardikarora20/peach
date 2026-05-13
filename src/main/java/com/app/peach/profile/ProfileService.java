@@ -11,6 +11,9 @@ import com.app.peach.profile.dto.PublicProfileDTO;
 import com.app.peach.user.UserEntity;
 import com.app.peach.user.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -109,6 +112,17 @@ public class ProfileService {
         return toDTO(saved);
     }
 
+    public List<PublicProfileDTO> getFeed(UUID userId, int limit) {
+        int safeLimit = Math.min(Math.max(limit, 1), 200); // cap to prevent abuse
+        Pageable pageable = PageRequest.of(0, safeLimit);
+        List <ProfileEntity> list = profileRepository.findFeedForUser(userId, pageable);
+        List <PublicProfileDTO> result = new ArrayList<>();
+        for(ProfileEntity curr: list){
+            result.add(toPublicDTO(curr));
+        }
+        return result;
+    }
+
     private ProfileResponseDTO toDTO(ProfileEntity p) {
         List<String> images = loadImageUrls(p.getUserId());
 
@@ -191,14 +205,14 @@ public class ProfileService {
         );
     }
 
-    public List<PublicProfileDTO> getFeed(UUID userId) {
-        List <ProfileEntity> list = profileRepository.findByUser_IdNot(userId);
-        List <PublicProfileDTO> result = new ArrayList<>();
-        for(ProfileEntity curr: list){
-            result.add(toPublicDTO(curr));
-        }
-        return result;
-    }
+//    public List<PublicProfileDTO> getFeed(UUID userId) {
+//        List <ProfileEntity> list = profileRepository.findByUser_IdNot(userId);
+//        List <PublicProfileDTO> result = new ArrayList<>();
+//        for(ProfileEntity curr: list){
+//            result.add(toPublicDTO(curr));
+//        }
+//        return result;
+//    }
 
     private List<String> loadImageUrls(UUID userId) {
         return photoRepository.findByUser_IdOrderByPositionAsc(userId)
