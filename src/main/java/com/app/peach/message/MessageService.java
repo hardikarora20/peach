@@ -35,44 +35,45 @@ public class MessageService {
     @Transactional
     public MessageResponseDTO sendMessage(UUID currentUserId, SendMessageRequestDTO req) {
 
-        // 1) Validate input
+        // 1) validate input
         if (req.getMatchId() == null) throw new BadRequestException("matchId is required");
         if (req.getContent() == null || req.getContent().trim().isEmpty())
             throw new BadRequestException("content is required");
 
-        //  if no data then return exc if not then clean and take it in content
+        // 2) clean and validate content
         String content = req.getContent().trim();
         if (content.length() > 1000) throw new BadRequestException("content too long");
 
-        // 2) Load match
-        //  get match info now, which will contain the id of the 2 users and the match id when it was created
+        // 3) load match
         MatchEntity match = matchRepository.findById(req.getMatchId())
                 .orElseThrow(() -> new NotFoundException("Match not found"));
 
-        // 3) Authorization: must be participant
-        //  get userIds of both the users and check if one of the id matches the logged in id
+        // 4) authorization: must be participant
         UUID u1 = match.getUser1().getId();
         UUID u2 = match.getUser2().getId();
-        System.out.println(currentUserId);
-        System.out.println(u1 + "  " + u2);
-        System.out.println(!currentUserId.equals(u2));
-        System.out.println(!currentUserId.equals(u1));
         if (!currentUserId.equals(u1) && !currentUserId.equals(u2)) {
             throw new ForbiddenException("Not allowed");
         }
 
-        //  if everything looks good, load the currentUser then
-        // 4) Load sender
+        // 5) load sender
         UserEntity sender = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
-        // 5) Save message
-        //  and then save the actual message
+        // 6) save message
+        //    (your constructor sets sentAt = LocalDateTime.now())
         MessageEntity saved = messageRepository.save(new MessageEntity(match, sender, content));
 
+        // 7) update match summary fields (for frontend list)
         match.setLastMessageAt(saved.getSentAt());
         match.setLastMessagePreview(content.length() > 120 ? content.substring(0, 120) : content);
+
+        // 8) increment unread for the OTHER user (receiver)
         match.incrementUnreadFor(currentUserId);
+
+        // 9) persist match updates (important!)
+        matchRepository.save(match);
+
+        // 10) return response dto
         return new MessageResponseDTO(
                 saved.getId(),
                 match.getId(),
@@ -82,37 +83,39 @@ public class MessageService {
         );
     }
 
-    @Transactional(readOnly = true)
+
+    @Transactional
     public List<MessageResponseDTO> getMessages(UUID matchId, boolean markRead) {
+
+        // 0) get current user id from security context
         UUID currentUserId = SecurityUtils.getCurrentUserId();
-        //  to start with verifying if match exists
+
+        // 1) verify if match exists
         MatchEntity match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new NotFoundException("Match not found"));
 
-        //  then the same thing matching user ids and stuff
+        // 2) authorization: user must be part of match
         UUID u1 = match.getUser1().getId();
         UUID u2 = match.getUser2().getId();
         if (!currentUserId.equals(u1) && !currentUserId.equals(u2)) {
             throw new ForbiddenException("Not allowed");
         }
 
+        // 3) if markRead=true then reset unread for current user
+        //    (NOTE: lastMessageAt / lastMessagePreview will NOT be touched here)
         if (markRead) {
             match.markReadFor(currentUserId);
+            matchRepository.save(match); // persist unread reset
         }
-        //  then getting all messages for this particular match id in asc order
-        //  as we get the response in message entity so loading it in messageresponsedto then
-        //  returning the list of message responses
+
+        // 4) fetch all messages for this match (asc by sentAt)
+        // 5) map MessageEntity -> MessageResponseDTO and return
         return messageRepository.findByMatch_IdOrderBySentAtAsc(matchId)
                 .stream()
-                .map(m -> new MessageResponseDTO(
-                        m.getId(),
-                        m.getMatch().getId(),
-                        m.getSender().getId(),
-                        m.getContent(),
-                        m.getSentAt()
-                )).collect(Collectors.toList());
-
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
+
 
     private MessageResponseDTO toDTO(MessageEntity m) {
         return new MessageResponseDTO(

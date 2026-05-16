@@ -141,15 +141,35 @@ public class MatchService {
         );
     }
 
-    private PublicProfileDTO toPublicProfileDto(ProfileEntity profile) {
+    private PublicProfileDTO toPublicProfileDto(ProfileEntity p) {
+        List<String> images = loadImageUrls(p.getUserId());
+        List<ProfilePromptDTO> prompts = readPrompts(p);
+
         return new PublicProfileDTO(
-                profile.getUser().getId(),
-                profile.getName(),
-                profile.getAge(),
-                profile.getGender(),
-                profile.getBio(),
-                profile.getLocation()
+                p.getId(),
+                p.getUserId(),
+                p.getName(),
+                p.getAge(),
+                p.getGender(),
+                p.getBio(),
+                p.getLocation(),
+                p.getDatingIntent(),
+                p.getConnectionPreference(),
+                p.getOpenToLongDistance(),
+                p.getPersonalityTraits(),
+                p.getCommunicationStyle(),
+                p.getLoveLanguage(),
+                p.getConflictStyle(),
+                p.getDrinkHabit(),
+                p.getSmokeHabit(),
+                p.getFoodPreference(),
+                p.getSleepStyle(),
+                p.getCoreValues(),
+                p.getDealbreakers(),
+                p.getInterests(),
+                images,
+                p.getOpeningLine(),
+                prompts
         );
     }
-
 }

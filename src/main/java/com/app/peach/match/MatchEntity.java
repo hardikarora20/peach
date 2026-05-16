@@ -41,21 +41,29 @@ public class MatchEntity {
     @Column(nullable = false)
     private int unreadCountUser2 = 0;
 
-    public void incrementUnreadFor(UUID userId) {
-        if (user1.getId().equals(userId)) {
+
+    public void incrementUnreadFor(UUID senderId) {
+        if (user1.getId().equals(senderId)) {
             unreadCountUser2++;
-        } else if (user2.getId().equals(userId)) {
+        } else if (user2.getId().equals(senderId)) {
             unreadCountUser1++;
+        } else {
+            throw new IllegalArgumentException("Sender is not part of this match");
         }
     }
+
+
 
     public void markReadFor(UUID userId) {
         if (user1.getId().equals(userId)) {
             unreadCountUser1 = 0;
         } else if (user2.getId().equals(userId)) {
             unreadCountUser2 = 0;
+        } else {
+            throw new IllegalArgumentException("User is not part of this match");
         }
     }
+
 
     public int getUnreadCountFor(UUID userId) {
         if (user1.getId().equals(userId)) {
