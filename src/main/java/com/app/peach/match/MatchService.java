@@ -78,9 +78,10 @@ public class MatchService {
 
             List<ProfilePromptDTO> prompts = readPrompts(profileOfMatch);
             PublicProfileDTO publicProfileOfMatch = profileOfMatch == null
-                    ? new PublicProfileDTO(idOfMatch, idOfOtherUser, null, null, null, null, null, null, null, null, null, null, null, null,  null, null, null, null, null, null, null, null, null, null)
-                    : new PublicProfileDTO(idOfMatch, idOfOtherUser,
-//                    profileOfMatch.getId(),
+                    ? new PublicProfileDTO(null, idOfMatch, null, null, null, null, null, null, null, null, null, null, null, null,  null, null, null, null, null, null, null, null, null, null)
+                    : new PublicProfileDTO(
+                    profileOfMatch.getId(),
+                    idOfMatch,
                     profileOfMatch.getName(),
                     profileOfMatch.getAge(),
                     profileOfMatch.getGender(),

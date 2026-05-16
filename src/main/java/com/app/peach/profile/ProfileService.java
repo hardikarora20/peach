@@ -168,7 +168,7 @@ public class ProfileService {
         Optional<ProfileEntity> optProfile = profileRepository.findById(profileUserId);
         ProfileEntity profile = optProfile.get();
         System.out.println(profile);
-        if (profile == null) return null;
+        if (profile == null) return null;   
 
         return toPublicDTO(profile);
     }
