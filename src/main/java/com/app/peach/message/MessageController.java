@@ -27,9 +27,8 @@ public class MessageController {
 
     //  this is when you open a chat, getting all messages from this particular match
     @GetMapping("/{matchId}")
-    public ResponseEntity<List<MessageResponseDTO>> get(@PathVariable UUID matchId) {
-        UUID userId = SecurityUtils.getCurrentUserId();
-        return ResponseEntity.ok(messageService.getMessages(userId, matchId));
+    public ResponseEntity<List<MessageResponseDTO>> get(@PathVariable UUID matchId, @RequestParam(defaultValue = "false") boolean markRead) {
+        return ResponseEntity.ok(messageService.getMessages(matchId, markRead));
     }
 
 //    @GetMapping("/{matchId}")

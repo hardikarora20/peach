@@ -4,6 +4,7 @@ import com.app.peach.user.UserEntity;
 import org.hibernate.annotations.Type;import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -29,20 +30,47 @@ public class MatchEntity {
     @Column(nullable = false)
     private LocalDateTime matchedAt;
 
-    // ✅ NEW: last updated / preview
-    @Column(name = "last_message_at")
     private LocalDateTime lastMessageAt;
 
-    @Column(name = "last_message_preview", length = 255)
+    @Column(length = 500)
     private String lastMessagePreview;
 
-    // ✅ NEW: read pointers (per user)
-    @Column(name = "user1_last_read_at")
-    private LocalDateTime user1LastReadAt;
+    @Column(nullable = false)
+    private int unreadCountUser1 = 0;
 
-    @Column(name = "user2_last_read_at")
-    private LocalDateTime user2LastReadAt;
+    @Column(nullable = false)
+    private int unreadCountUser2 = 0;
 
+    public void incrementUnreadFor(UUID userId) {
+        if (user1.getId().equals(userId)) {
+            unreadCountUser2++;
+        } else if (user2.getId().equals(userId)) {
+            unreadCountUser1++;
+        }
+    }
+
+    public void markReadFor(UUID userId) {
+        if (user1.getId().equals(userId)) {
+            unreadCountUser1 = 0;
+        } else if (user2.getId().equals(userId)) {
+            unreadCountUser2 = 0;
+        }
+    }
+
+    public int getUnreadCountFor(UUID userId) {
+        if (user1.getId().equals(userId)) {
+            return unreadCountUser1;
+        }
+        if (user2.getId().equals(userId)) {
+            return unreadCountUser2;
+        }
+        return 0;
+    }
+
+    public UUID getOtherUserId(UUID userId) {
+        if (user1.getId().equals(userId)) return user2.getId();
+        return user1.getId();
+    }
     protected MatchEntity() {}
 
     public MatchEntity(UserEntity user1, UserEntity user2) {
@@ -59,14 +87,11 @@ public class MatchEntity {
     // ✅ getters for new fields
     public LocalDateTime getLastMessageAt() { return lastMessageAt; }
     public String getLastMessagePreview() { return lastMessagePreview; }
-    public LocalDateTime getUser1LastReadAt() { return user1LastReadAt; }
-    public LocalDateTime getUser2LastReadAt() { return user2LastReadAt; }
 
     // ✅ setters for service updates
     public void setLastMessageAt(LocalDateTime lastMessageAt) { this.lastMessageAt = lastMessageAt; }
     public void setLastMessagePreview(String lastMessagePreview) { this.lastMessagePreview = lastMessagePreview; }
 
-    public void setUser1LastReadAt(LocalDateTime user1LastReadAt) { this.user1LastReadAt = user1LastReadAt; }
-    public void setUser2LastReadAt(LocalDateTime user2LastReadAt) { this.user2LastReadAt = user2LastReadAt; }
 }
+
 

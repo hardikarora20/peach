@@ -37,6 +37,15 @@ public class PublicProfileDTO {
     private String openingLine;
     private List<ProfilePromptDTO> profilePrompts;
 
+    public PublicProfileDTO(UUID userId, String name, Integer age, String gender, String bio, String location) {
+        this.userId = userId;
+        this.name = name;
+        this.age = age;
+        this.gender = gender;
+        this.bio = bio;
+        this.location = location;
+    }
+
     public PublicProfileDTO(UUID profileId, UUID userId, String name, Integer age, String gender, String bio, String location, String datingIntent,
                             String connectionPreference,
                             String openToLongDistance,

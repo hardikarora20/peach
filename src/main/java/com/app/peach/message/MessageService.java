@@ -3,6 +3,7 @@ package com.app.peach.message;
 import com.app.peach.common.exception.BadRequestException;
 import com.app.peach.common.exception.ForbiddenException;
 import com.app.peach.common.exception.NotFoundException;
+import com.app.peach.common.util.SecurityUtils;
 import com.app.peach.match.MatchEntity;
 import com.app.peach.match.MatchRepository;
 import com.app.peach.message.dto.MessageResponseDTO;
@@ -69,12 +70,21 @@ public class MessageService {
         //  and then save the actual message
         MessageEntity saved = messageRepository.save(new MessageEntity(match, sender, content));
 
-        return toDTO(saved);
+        match.setLastMessageAt(saved.getSentAt());
+        match.setLastMessagePreview(content.length() > 120 ? content.substring(0, 120) : content);
+        match.incrementUnreadFor(currentUserId);
+        return new MessageResponseDTO(
+                saved.getId(),
+                match.getId(),
+                currentUserId,
+                saved.getContent(),
+                saved.getSentAt()
+        );
     }
 
     @Transactional(readOnly = true)
-    public List<MessageResponseDTO> getMessages(UUID currentUserId, UUID matchId) {
-
+    public List<MessageResponseDTO> getMessages(UUID matchId, boolean markRead) {
+        UUID currentUserId = SecurityUtils.getCurrentUserId();
         //  to start with verifying if match exists
         MatchEntity match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new NotFoundException("Match not found"));
@@ -86,13 +96,22 @@ public class MessageService {
             throw new ForbiddenException("Not allowed");
         }
 
+        if (markRead) {
+            match.markReadFor(currentUserId);
+        }
         //  then getting all messages for this particular match id in asc order
         //  as we get the response in message entity so loading it in messageresponsedto then
         //  returning the list of message responses
         return messageRepository.findByMatch_IdOrderBySentAtAsc(matchId)
                 .stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+                .map(m -> new MessageResponseDTO(
+                        m.getId(),
+                        m.getMatch().getId(),
+                        m.getSender().getId(),
+                        m.getContent(),
+                        m.getSentAt()
+                )).collect(Collectors.toList());
+
     }
 
     private MessageResponseDTO toDTO(MessageEntity m) {

@@ -19,14 +19,19 @@ public class MatchController {
         this.matchService = matchService;
     }
 
+//    public ResponseEntity<List<MatchItemDTO>> getMyMatches() {
+//
+//        UUID userId = SecurityUtils.getCurrentUserId();
+//        if (userId == null) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//        }
+//
+//        return ResponseEntity.ok(matchService.getMyMatches(userId));
+//    }
+
     @GetMapping
-    public ResponseEntity<List<MatchItemDTO>> getMyMatches() {
-
-        UUID userId = SecurityUtils.getCurrentUserId();
-        if (userId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        return ResponseEntity.ok(matchService.getMyMatches(userId));
+    public List<MatchItemDTO> getMatches() {
+        UUID currentUserId = SecurityUtils.getCurrentUserId();
+        return matchService.getMatchesForUser(currentUserId);
     }
 }

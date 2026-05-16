@@ -115,4 +115,41 @@ public class MatchService {
                 .collect(Collectors.toList());
     }
 
+    public List<MatchItemDTO> getMatchesForUser(UUID currentUserId) {
+        List <MatchEntity> resultList= matchRepository.findByUser1_IdOrUser2_IdOrderByLastMessageAtDesc(currentUserId, currentUserId);
+        List <MatchItemDTO> result = new ArrayList<>();
+        for(MatchEntity curr: resultList){
+            result.add(toDto(curr, currentUserId));
+        }
+        return result;
+    }
+
+    private MatchItemDTO toDto(MatchEntity match, UUID currentUserId) {
+        UUID otherUserId = match.getOtherUserId(currentUserId);
+
+        PublicProfileDTO otherUser = profileRepository.findByUser_Id(otherUserId)
+                .map(this::toPublicProfileDto)
+                .orElse(new PublicProfileDTO(null, otherUserId, null, null, null, null, null, null, null, null, null, null, null, null,  null, null, null, null, null, null, null, null, null, null));
+
+        return new MatchItemDTO(
+                match.getId(),
+                match.getMatchedAt(),
+                otherUser,
+                match.getLastMessageAt(),
+                match.getLastMessagePreview(),
+                match.getUnreadCountFor(currentUserId)
+        );
+    }
+
+    private PublicProfileDTO toPublicProfileDto(ProfileEntity profile) {
+        return new PublicProfileDTO(
+                profile.getUser().getId(),
+                profile.getName(),
+                profile.getAge(),
+                profile.getGender(),
+                profile.getBio(),
+                profile.getLocation()
+        );
+    }
+
 }
