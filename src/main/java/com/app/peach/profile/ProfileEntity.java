@@ -38,6 +38,9 @@ public class ProfileEntity {
     @Column(length = 500)
     private String bio;
 
+    private Double xCoordinate;
+    private Double yCoordinate;
+
     private String location;
 
     @Column(nullable = false)
@@ -111,24 +114,28 @@ public class ProfileEntity {
     @Column(name = "opening_line", length = 255)
     private String openingLine;
 
-    protected ProfileEntity() {}
+    public ProfileEntity() {}
 
-    public ProfileEntity(UserEntity user, String name, Integer age, String gender, String bio, String location) {
+    public ProfileEntity(UserEntity user, String name, Integer age, String gender, String bio, String location, Double xCoordinate, Double yCoordinate) {
         this.user = user;
         this.name = name;
         this.age = age;
         this.gender = gender;
         this.bio = bio;
         this.location = location;
+        this.xCoordinate = xCoordinate;
+        this.yCoordinate = yCoordinate;
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void updateCore(String name, Integer age, String gender, String bio, String location) {
+    public void updateCore(String name, Integer age, String gender, String bio, String location, Double xCoordinate, Double yCoordinate) {
         this.name = name;
         this.age = age;
         this.gender = gender;
         this.bio = bio;
         this.location = location;
+        this.xCoordinate = xCoordinate;
+        this.yCoordinate = yCoordinate;
         this.updatedAt = LocalDateTime.now();
     }
 
@@ -215,7 +222,21 @@ public class ProfileEntity {
     public void setPrompt3(String prompt3) { this.prompt3 = prompt3; }
     public void setOpeningLine(String openingLine) { this.openingLine = openingLine; }
 
+    public Double getxCoordinate() {
+        return xCoordinate;
+    }
 
+    public void setxCoordinate(Double xCoordinate) {
+        this.xCoordinate = xCoordinate;
+    }
+
+    public Double getyCoordinate() {
+        return yCoordinate;
+    }
+
+    public void setyCoordinate(Double yCoordinate) {
+        this.yCoordinate = yCoordinate;
+    }
 
     @Override
     public String toString() {
@@ -226,6 +247,8 @@ public class ProfileEntity {
                 ", age=" + age +
                 ", gender='" + gender + '\'' +
                 ", bio='" + bio + '\'' +
+                ", xCoordinate=" + xCoordinate +
+                ", yCoordinate=" + yCoordinate +
                 ", location='" + location + '\'' +
                 ", updatedAt=" + updatedAt +
                 ", datingIntent='" + datingIntent + '\'' +

@@ -16,7 +16,9 @@ public class PublicProfileDTO {
     private String gender;
     private String bio;
     private String location;
-
+    private Double distance;
+//    private Double xCoordinate;
+//    private Double yCoordinate;
     private String datingIntent;
     private String connectionPreference;
     private String openToLongDistance;
@@ -37,16 +39,22 @@ public class PublicProfileDTO {
     private String openingLine;
     private List<ProfilePromptDTO> profilePrompts;
 
-    public PublicProfileDTO(UUID userId, String name, Integer age, String gender, String bio, String location) {
+    public PublicProfileDTO() {
+    }
+
+    public PublicProfileDTO(UUID profileId, UUID userId, String name, Integer age, String gender, String bio, String location) {
         this.userId = userId;
+        this.profileId = profileId;
         this.name = name;
         this.age = age;
         this.gender = gender;
         this.bio = bio;
         this.location = location;
+//        this.xCoordinate = xCoordinate;
+//        this.yCoordinate = yCoordinate;
     }
 
-    public PublicProfileDTO(UUID profileId, UUID userId, String name, Integer age, String gender, String bio, String location, String datingIntent,
+    public PublicProfileDTO(UUID profileId, UUID userId, String name, Integer age, String gender, String bio, String location, Double xCoordinate, Double yCoordinate, String datingIntent,
                             String connectionPreference,
                             String openToLongDistance,
                             Set<String> personalityTraits,
@@ -71,6 +79,8 @@ public class PublicProfileDTO {
         this.gender = gender;
         this.bio = bio;
         this.location = location;
+//        this.xCoordinate = xCoordinate;
+//        this.yCoordinate = yCoordinate;
         this.datingIntent = datingIntent;
         this.connectionPreference = connectionPreference;
         this.openToLongDistance = openToLongDistance;
@@ -108,6 +118,32 @@ public class PublicProfileDTO {
     public String getGender() { return gender; }
     public String getBio() { return bio; }
     public String getLocation() { return location; }
+
+//    public Double getxCoordinate() {
+//        return xCoordinate;
+//    }
+//
+//    public void setxCoordinate(Double xCoordinate) {
+//        this.xCoordinate = xCoordinate;
+//    }
+
+//    public Double getyCoordinate() {
+//        return yCoordinate;
+//    }
+//
+//    public void setyCoordinate(Double yCoordinate) {
+//        this.yCoordinate = yCoordinate;
+//    }
+
+    public Double getDistance() {
+        return distance;
+    }
+//
+    public PublicProfileDTO setDistance(Double distance) {
+        this.distance = distance;
+        return this;
+    }
+
     public String getDatingIntent() { return datingIntent; }
     public String getConnectionPreference() { return connectionPreference; }
     public String getOpenToLongDistance() { return openToLongDistance; }

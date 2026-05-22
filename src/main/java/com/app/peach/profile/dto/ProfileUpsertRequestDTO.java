@@ -9,6 +9,8 @@ public class ProfileUpsertRequestDTO {
     private String name;
     private Integer age;
     private String gender;
+    private Double xCoordinate;
+    private Double yCoordinate;
     private String location;
     private String bio;
 
@@ -61,6 +63,23 @@ public class ProfileUpsertRequestDTO {
 
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
+
+
+    public Double getxCoordinate() {
+        return xCoordinate;
+    }
+
+    public void setxCoordinate(Double xCoordinate) {
+        this.xCoordinate = xCoordinate;
+    }
+
+    public Double getyCoordinate() {
+        return yCoordinate;
+    }
+
+    public void setyCoordinate(Double yCoordinate) {
+        this.yCoordinate = yCoordinate;
+    }
 
     public String getBio() { return bio; }
     public void setBio(String bio) { this.bio = bio; }

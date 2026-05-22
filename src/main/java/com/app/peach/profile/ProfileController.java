@@ -2,6 +2,7 @@ package com.app.peach.profile;
 
 import com.app.peach.common.util.SecurityUtils;
 import com.app.peach.profile.dto.*;
+import com.app.peach.userLocation.dto.FeedRequestDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -72,13 +73,13 @@ public class ProfileController {
 //        return ResponseEntity.ok(profileService.getFeed(userId));
 //    }
 
-    @GetMapping("/feed")
-    public ResponseEntity<List<PublicProfileDTO>> getFeed(@RequestParam(defaultValue = "50") int limit
-    ) {
+    @PostMapping("/feed")
+    public ResponseEntity<List<PublicProfileDTO>> getFeed(@RequestBody FeedRequestDTO request, @RequestParam(defaultValue = "50") int limit
+    , @RequestParam(required = false, defaultValue = "50") Double range) {
         UUID userId = SecurityUtils.getCurrentUserId();
         if (userId == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        return ResponseEntity.ok(profileService.getFeed(userId, limit));
+        return ResponseEntity.ok(profileService.getFeed(request));
     }
 
     @GetMapping("/me/exists")

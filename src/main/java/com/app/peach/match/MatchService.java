@@ -78,7 +78,7 @@ public class MatchService {
 
             List<ProfilePromptDTO> prompts = readPrompts(profileOfMatch);
             PublicProfileDTO publicProfileOfMatch = profileOfMatch == null
-                    ? new PublicProfileDTO(null, idOfMatch, null, null, null, null, null, null, null, null, null, null, null, null,  null, null, null, null, null, null, null, null, null, null)
+                    ? new PublicProfileDTO()
                     : new PublicProfileDTO(
                     profileOfMatch.getId(),
                     idOfMatch,
@@ -87,6 +87,8 @@ public class MatchService {
                     profileOfMatch.getGender(),
                     profileOfMatch.getBio(),
                     profileOfMatch.getLocation(),
+                    profileOfMatch.getxCoordinate(),
+                    profileOfMatch.getyCoordinate(),
                     profileOfMatch.getDatingIntent(),
                     profileOfMatch.getConnectionPreference(),
                     profileOfMatch.getOpenToLongDistance(),
@@ -108,6 +110,14 @@ public class MatchService {
         }
         return listOfMatches;
     }
+
+    private double calculateDistance(double x1, double y1, double x2, double y2) {
+        double dx = x2 - x1;
+        double dy = y2 - y1;
+
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
     private List<String> loadImageUrls(UUID userId) {
         return photoRepository.findByUser_IdOrderByPositionAsc(userId)
                 .stream()
@@ -129,7 +139,7 @@ public class MatchService {
 
         PublicProfileDTO otherUser = profileRepository.findByUser_Id(otherUserId)
                 .map(this::toPublicProfileDto)
-                .orElse(new PublicProfileDTO(null, otherUserId, null, null, null, null, null, null, null, null, null, null, null, null,  null, null, null, null, null, null, null, null, null, null));
+                .orElse(new PublicProfileDTO(null, otherUserId, null, null, null, null, null));
 
         return new MatchItemDTO(
                 match.getId(),
@@ -153,6 +163,8 @@ public class MatchService {
                 p.getGender(),
                 p.getBio(),
                 p.getLocation(),
+                p.getxCoordinate(),
+                p.getyCoordinate(),
                 p.getDatingIntent(),
                 p.getConnectionPreference(),
                 p.getOpenToLongDistance(),

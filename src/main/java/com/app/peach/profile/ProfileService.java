@@ -10,13 +10,19 @@ import com.app.peach.profile.dto.ProfileUpsertRequestDTO;
 import com.app.peach.profile.dto.PublicProfileDTO;
 import com.app.peach.user.UserEntity;
 import com.app.peach.user.UserRepository;
+import com.app.peach.userLocation.UserLocationEntity;
+import com.app.peach.userLocation.UserLocationRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.app.peach.common.util.SecurityUtils;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import com.app.peach.userLocation.dto.FeedRequestDTO;
 
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,15 +33,18 @@ public class ProfileService {
     private final UserRepository userRepository;
     private final PhotoRepository photoRepository;
     private final ObjectMapper objectMapper;
+    private final UserLocationRepository userLocationRepository;
 
     public ProfileService(ProfileRepository profileRepository,
                           UserRepository userRepository,
                           PhotoRepository photoRepository,
-                          ObjectMapper objectMapper) {
+                          ObjectMapper objectMapper,
+                          UserLocationRepository userLocationRepository) {
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
         this.photoRepository = photoRepository;
         this.objectMapper = objectMapper;
+        this.userLocationRepository = userLocationRepository;
     }
 
 
@@ -67,10 +76,10 @@ public class ProfileService {
         ProfileEntity profile = profileRepository.findByUser_Id(userId).get();
         //    if not then we create it from start
         if (profile == null) {
-            profile = new ProfileEntity(user, req.getName(), req.getAge(), req.getGender(), req.getBio(), req.getLocation());
+            profile = new ProfileEntity(user, req.getName(), req.getAge(), req.getGender(), req.getBio(), req.getLocation(), req.getxCoordinate(), req.getyCoordinate());
         } else {
         //    if already exists then we get update things of the profile not the user
-            profile.updateCore(req.getName(), req.getAge(), req.getGender(), req.getBio(), req.getLocation());
+            profile.updateCore(req.getName(), req.getAge(), req.getGender(), req.getBio(), req.getLocation(), req.getxCoordinate(), req.getyCoordinate());
         }
 
         profile.updateQuestions(
@@ -112,15 +121,161 @@ public class ProfileService {
         return toDTO(saved);
     }
 
-    public List<PublicProfileDTO> getFeed(UUID userId, int limit) {
-        int safeLimit = Math.min(Math.max(limit, 1), 200); // cap to prevent abuse
-        Pageable pageable = PageRequest.of(0, safeLimit);
-        List <ProfileEntity> list = profileRepository.findFeedForUser(userId, pageable);
-        List <PublicProfileDTO> result = new ArrayList<>();
-        for(ProfileEntity curr: list){
-            result.add(toPublicDTO(curr));
+//    public List<PublicProfileDTO> getFeed(UUID userId, int limit, Double range) {
+//
+//
+//        ProfileEntity myProfile = profileRepository.findByUser_Id(userId).get();
+//
+//        if (myProfile == null) {
+//            throw new RuntimeException("Current user profile not found");
+//        }
+//
+//        if (myProfile.getxCoordinate() == null || myProfile.getyCoordinate() == null) {
+//            throw new RuntimeException("Current user coordinates not set");
+//        }
+//
+//        double allowedRange = range != null ? range : 50.0;
+//
+//        int safeLimit = Math.min(Math.max(limit, 1), 200); // cap to prevent abuse
+//        Pageable pageable = PageRequest.of(0, safeLimit);
+//
+//        List<ProfileEntity> profiles = profileRepository.findFeedForUser(userId, pageable);
+//
+//        return profiles.stream()
+//                .filter(profile -> profile.getxCoordinate() != null && profile.getyCoordinate() != null)
+//                .map(profile -> {
+//                    double distance = calculateDistance(
+//                            myProfile.getxCoordinate(),
+//                            myProfile.getyCoordinate(),
+//                            profile.getxCoordinate(),
+//                            profile.getyCoordinate()
+//                    );
+//
+//                    PublicProfileDTO dto = toPublicDTO(profile);
+//                    dto.setDistance(distance);
+//
+//                    return dto;
+//                })
+//                .filter(dto -> dto.getDistance() <= allowedRange)
+//                .sorted(Comparator.comparing(PublicProfileDTO::getDistance))
+//                .collect(Collectors.toList());
+//    }
+
+    public List<PublicProfileDTO> getFeed(FeedRequestDTO request) {
+
+        UUID currentUserId = SecurityUtils.getCurrentUserId();
+
+        System.out.println(request);
+
+        // validate request
+        if (request.getXCoordinate() == null || request.getYCoordinate() == null) {
+            throw new RuntimeException("Location is required");
         }
+
+        double ax = request.getXCoordinate();
+        double ay = request.getYCoordinate();
+        double range = request.getRange() != null ? request.getRange() : 50.0;
+
+        UserEntity currentUser = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // ✅ update A's location (fresh)
+        upsertLocation(currentUser, ax, ay);
+
+        // ✅ get others (B)
+        List<UserLocationEntity> others =
+                userLocationRepository.findByUser_IdNot(currentUserId);
+        System.out.println(others);
+        List<PublicProfileDTO> result = new ArrayList<>();
+
+        for (UserLocationEntity other : others) {
+
+            // skip if location missing
+            if (other.getXCoordinate() == null || other.getYCoordinate() == null) {
+                continue;
+            }
+
+            // ✅ optional: skip stale data
+            if (other.getUpdatedAt() == null ||
+                    other.getUpdatedAt().isBefore(LocalDateTime.now().minusMinutes(30))) {
+                continue;
+            }
+
+            double distance = calculateDistance(
+                    ax, ay,
+                    other.getXCoordinate(),
+                    other.getYCoordinate()
+            );
+            System.out.println(distance);
+            if (distance > range) {
+                continue;
+            }
+
+            UUID otherUserId = other.getUser().getId();
+
+            ProfileEntity profile = profileRepository.findByUser_Id(otherUserId).get();
+
+            if (profile == null) {
+                continue;
+            }
+
+            PublicProfileDTO dto = toPublicDTO(profile);
+            dto.setDistance(distance);
+
+            result.add(dto);
+        }
+
+        result.sort(Comparator.comparing(PublicProfileDTO::getDistance));
+        System.out.println(result);
         return result;
+    }
+
+    private void upsertLocation(UserEntity user, Double x, Double y) {
+
+        try {
+            UserLocationEntity location =
+                    userLocationRepository.findByUser_Id(user.getId());
+
+            if (location == null) {
+                location = new UserLocationEntity();
+                location.setUser(user);
+            }
+
+            location.setXCoordinate(x);
+            location.setYCoordinate(y);
+            location.setUpdatedAt(LocalDateTime.now());
+
+            userLocationRepository.save(location);
+
+        } catch (DataIntegrityViolationException ex) {
+
+            // ✅ Another request inserted first → fetch and update
+            UserLocationEntity existing =
+                    userLocationRepository.findByUser_Id(user.getId());
+
+            existing.setXCoordinate(x);
+            existing.setYCoordinate(y);
+            existing.setUpdatedAt(LocalDateTime.now());
+
+            userLocationRepository.save(existing);
+        }
+    }
+
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+
+        final int R = 6371; // Earth radius in km
+
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+
+        double a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                        + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                        * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return R * c; // distance in km
     }
 
     private ProfileResponseDTO toDTO(ProfileEntity p) {
@@ -136,6 +291,8 @@ public class ProfileService {
                 p.getGender(),
                 p.getBio(),
                 p.getLocation(),
+                p.getxCoordinate(),
+                p.getyCoordinate(),
                 p.getUpdatedAt(),
         p.getDatingIntent(),
         p.getConnectionPreference(),
@@ -168,7 +325,7 @@ public class ProfileService {
         Optional<ProfileEntity> optProfile = profileRepository.findById(profileUserId);
         ProfileEntity profile = optProfile.get();
         System.out.println(profile);
-        if (profile == null) return null;   
+        if (profile == null) return null;
 
         return toPublicDTO(profile);
     }
@@ -184,6 +341,8 @@ public class ProfileService {
                 p.getGender(),
                 p.getBio(),
                 p.getLocation(),
+                p.getxCoordinate(),
+                p.getyCoordinate(),
                 p.getDatingIntent(),
                 p.getConnectionPreference(),
                 p.getOpenToLongDistance(),

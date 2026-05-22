@@ -15,6 +15,8 @@ public class ProfileResponseDTO {
     private String gender;
     private String bio;
     private String location;
+    private Double xCoordinate;
+    private Double yCoordinate;
     private LocalDateTime updatedAt;
 
     private String datingIntent;
@@ -38,7 +40,7 @@ public class ProfileResponseDTO {
     private List<ProfilePromptDTO> profilePrompts;
 
 
-    public ProfileResponseDTO(UUID profileId, UUID userId, String name, Integer age, String gender, String bio, String location, LocalDateTime updatedAt, String datingIntent,
+    public ProfileResponseDTO(UUID profileId, UUID userId, String name, Integer age, String gender, String bio, String location, Double xCoordinate, Double yCoordinate, LocalDateTime updatedAt, String datingIntent,
                               String connectionPreference,
                               String openToLongDistance,
                               Set<String> personalityTraits,
@@ -62,6 +64,8 @@ public class ProfileResponseDTO {
         this.gender = gender;
         this.bio = bio;
         this.location = location;
+        this.xCoordinate = xCoordinate;
+        this.yCoordinate = yCoordinate;
         this.updatedAt = updatedAt;
         this.datingIntent = datingIntent;
         this.connectionPreference = connectionPreference;
@@ -101,6 +105,23 @@ public class ProfileResponseDTO {
     public String getGender() { return gender; }
     public String getBio() { return bio; }
     public String getLocation() { return location; }
+
+    public Double getxCoordinate() {
+        return xCoordinate;
+    }
+
+    public void setxCoordinate(Double xCoordinate) {
+        this.xCoordinate = xCoordinate;
+    }
+
+    public Double getyCoordinate() {
+        return yCoordinate;
+    }
+
+    public void setyCoordinate(Double yCoordinate) {
+        this.yCoordinate = yCoordinate;
+    }
+
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public String getDatingIntent() { return datingIntent; }
     public String getConnectionPreference() { return connectionPreference; }
