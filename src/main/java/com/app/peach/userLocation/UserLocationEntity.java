@@ -73,4 +73,15 @@ public class UserLocationEntity {
         this.updatedAt = updatedAt;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "UserLocationEntity{" +
+                "id=" + id +
+                ", user=" + user +
+                ", xCoordinate=" + xCoordinate +
+                ", yCoordinate=" + yCoordinate +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
 }

@@ -183,23 +183,23 @@ public class ProfileService {
         upsertLocation(currentUser, ax, ay);
 
         // ✅ get others (B)
-        List<UserLocationEntity> others =
-                userLocationRepository.findByUser_IdNot(currentUserId);
+        List<ProfileEntity> others =
+                profileRepository.findFeedForUser(currentUserId);
         System.out.println(others);
         List<PublicProfileDTO> result = new ArrayList<>();
 
-        for (UserLocationEntity other : others) {
-
+        for(ProfileEntity currUser: others){
+            UserLocationEntity other = userLocationRepository.findByUser_Id(currUser.getUser().getId());
             // skip if location missing
             if (other.getXCoordinate() == null || other.getYCoordinate() == null) {
                 continue;
             }
 
             // ✅ optional: skip stale data
-            if (other.getUpdatedAt() == null ||
-                    other.getUpdatedAt().isBefore(LocalDateTime.now().minusMinutes(30))) {
-                continue;
-            }
+//            if (other.getUpdatedAt() == null ||
+//                    other.getUpdatedAt().isBefore(LocalDateTime.now().minusMinutes(30))) {
+//                continue;
+//            }
 
             double distance = calculateDistance(
                     ax, ay,

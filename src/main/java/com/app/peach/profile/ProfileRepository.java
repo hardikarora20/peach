@@ -24,7 +24,7 @@ public interface ProfileRepository extends JpaRepository<ProfileEntity, UUID> {
     boolean existsCompleteCoreProfile(@Param("userId") UUID userId);
 
     @Query("select p from ProfileEntity p where p.user.id <> :userId and not exists (select 1 from SwipeEntity s where s.swiper.id = :userId and s.target.id = p.user.id ) and not exists ( select 1 from SwipeEntity s2 where s2.target.id = :userId and s2.liked = false and s2.swiper.id = p.user.id ) ")
-    List <ProfileEntity> findFeedForUser(@Param("userId") UUID userId, Pageable pageable);
+    List <ProfileEntity> findFeedForUser(@Param("userId") UUID userId);
 
 
 }
