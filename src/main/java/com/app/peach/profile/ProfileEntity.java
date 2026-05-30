@@ -116,6 +116,10 @@ public class ProfileEntity {
 
     public ProfileEntity() {}
 
+    public ProfileEntity(UserEntity user) {
+        this.user = user;
+    }
+
     public ProfileEntity(UserEntity user, String name, Integer age, String gender, String bio, String location, Double xCoordinate, Double yCoordinate) {
         this.user = user;
         this.name = name;

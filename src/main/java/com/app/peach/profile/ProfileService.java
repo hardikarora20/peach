@@ -15,9 +15,6 @@ import com.app.peach.userLocation.UserLocationRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.app.peach.common.util.SecurityUtils;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.app.peach.userLocation.dto.FeedRequestDTO;
 
@@ -49,10 +46,10 @@ public class ProfileService {
 
 
     public ProfileResponseDTO getMyProfile(UUID userId) {
-        ProfileEntity profile = profileRepository.findByUser_Id(userId).get();
-        if (profile == null)
-            return null;
-        return toDTO(profile);
+        Optional<ProfileEntity> profile = profileRepository.findByUser_Id(userId);
+        if(profile.isPresent())
+            return toDTO(profile.orElse(null));
+        return null;
     }
 
 
@@ -73,16 +70,35 @@ public class ProfileService {
         if (user == null)
             return null;
         //    if profile is present then we get that first
-        ProfileEntity profile = profileRepository.findByUser_Id(userId).get();
-        //    if not then we create it from start
-        if (profile == null) {
-            profile = new ProfileEntity(user, req.getName(), req.getAge(), req.getGender(), req.getBio(), req.getLocation(), req.getxCoordinate(), req.getyCoordinate());
-        } else {
-        //    if already exists then we get update things of the profile not the user
-            profile.updateCore(req.getName(), req.getAge(), req.getGender(), req.getBio(), req.getLocation(), req.getxCoordinate(), req.getyCoordinate());
-        }
+Optional<ProfileEntity> profileOptional = profileRepository.findByUser_Id(userId);
+System.out.println(profileOptional);
 
-        profile.updateQuestions(
+ProfileEntity profileEntity;
+
+if (!profileOptional.isPresent()) {
+    profileEntity = new ProfileEntity(
+        user,
+        req.getName(),
+        req.getAge(),
+        req.getGender(),
+        req.getBio(),
+        req.getLocation(),
+        req.getxCoordinate(),
+        req.getyCoordinate()
+    );
+} else {
+    profileEntity = profileOptional.get();
+    profileEntity.updateCore(
+        req.getName(),
+        req.getAge(),
+        req.getGender(),
+        req.getBio(),
+        req.getLocation(),
+        req.getxCoordinate(),
+        req.getyCoordinate()
+    );
+}
+        profileEntity.updateQuestions(
                 req.getDatingIntent(),
                 req.getConnectionPreference(),
                 req.getOpenToLongDistance(),
@@ -99,8 +115,8 @@ public class ProfileService {
                 req.getInterests()
         );
 
-        profile.setOpeningLine(req.getOpeningLine());
-        writePrompts(profile, req.getProfilePrompts());
+        profileEntity.setOpeningLine(req.getOpeningLine());
+        writePrompts(profileEntity, req.getProfilePrompts());
 
         int currCount = 0;
         System.out.println(photoRepository.countByUser_Id(userId));
@@ -116,7 +132,7 @@ public class ProfileService {
 //        save images in photo
 
         //    saving the newly created/updated profile
-        ProfileEntity saved = profileRepository.save(profile);
+        ProfileEntity saved = profileRepository.save(profileEntity);
 
         return toDTO(saved);
     }
@@ -175,13 +191,15 @@ public class ProfileService {
         double ax = request.getXCoordinate();
         double ay = request.getYCoordinate();
         double range = request.getRange() != null ? request.getRange() : 50.0;
-
+        System.out.println(ax+" "+ay+" "+range);
         UserEntity currentUser = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        System.out.println(currentUser);
         // ✅ update A's location (fresh)
         upsertLocation(currentUser, ax, ay);
 
+        System.out.println("updated");
         // ✅ get others (B)
         List<ProfileEntity> others =
                 profileRepository.findFeedForUser(currentUserId);

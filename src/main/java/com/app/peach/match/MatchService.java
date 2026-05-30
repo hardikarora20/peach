@@ -70,7 +70,9 @@ public class MatchService {
                 idOfOtherUser = currMatch.getUser2().getId();
                 idOfMatch = currMatch.getUser1().getId();
             }
-            ProfileEntity profileOfMatch = profileRepository.findByUser_Id(idOfMatch).get();
+            ProfileEntity profileOfMatch = profileRepository.findByUser_Id(idOfMatch)
+                    .orElseThrow(() -> new RuntimeException("Profile not found for matched user"));
+
 //            ProfileEntity profileOfOtherMatch = profileRepository.findByUserId(idOfOtherUser);
             System.out.println("profileOfMatch: " + profileOfMatch.getId());
 //            System.out.println("profileOfOtherMatch: " + profileOfOtherMatch);
