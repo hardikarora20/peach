@@ -44,8 +44,8 @@ public class SecurityConfig {
                 .and()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .antMatchers(HttpMethod.POST, "/users").permitAll()
                 .antMatchers(HttpMethod.POST, "/users/login").permitAll()
+                .antMatchers(HttpMethod.POST, "/users/register/**").permitAll()
                 .antMatchers("/h2-console/**").permitAll()  // only reachable when the console is enabled
                 .anyRequest().authenticated()
                 .and()
